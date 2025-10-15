@@ -37,7 +37,7 @@ Pastikan lingkungan pengembangan Anda memenuhi persyaratan berikut:
 1.  **Clone Repositori**
     ```bash
     git clone https://github.com/amrudzr/youtube-studio.git
-    cd nama-repo
+    cd youtube-studio
     ```
 
 2.  **Instal Dependensi**
