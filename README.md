@@ -36,7 +36,7 @@ Pastikan lingkungan pengembangan Anda memenuhi persyaratan berikut:
 
 1.  **Clone Repositori**
     ```bash
-    git clone [https://github.com/username/nama-repo.git](https://github.com/username/nama-repo.git)
+    git clone [https://github.com/amrudzr/youtube-studio.git](https://github.com/amrudzr/youtube-studio.git)
     cd nama-repo
     ```
 
