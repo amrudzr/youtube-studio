@@ -1,0 +1,18 @@
+{
+    "name": "polos-hermanoz/youtube-studio",
+    "description": "PHPUnit tests for YouTube Studio functionality",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpunit": "^12.4",
+        "symfony/test-pack": "^1.2"
+    },
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "PolosHermanoz\\YoutubeStudio\\": "src/"
+        }
+    },
+    "require": {
+        "nesbot/carbon": "^3.10"
+    }
+}
