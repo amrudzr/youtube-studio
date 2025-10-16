@@ -4,8 +4,6 @@ Repositori ini berisi implementasi dan contoh penggunaan PHPUnit untuk proyek PH
 
 [![PHPUnit Test CI](https://github.com/amrudzr/youtube-studio/actions/workflows/phpunit.yml/badge.svg)](https://github.com/amrudzr/youtube-studio/actions/workflows/phpunit.yml)
 
-> **Disclaimer Badge**: Untuk @amrudzr, badge status di atas adalah contoh. Untuk mengaktifkannya, Anda perlu setup GitHub Actions (atau CI/CD lainnya) di repositori ini. Anda dapat meminta pemilik repositori untuk memberikan akses atau mengonfigurasi workflow CI/CD agar badge ini berfungsi dan menampilkan status tes secara dinamis.
-
 ---
 
 ## 📋 Daftar Isi
@@ -124,7 +122,9 @@ Untuk menjaga kualitas, konsistensi, dan keterbacaan kode, ikuti panduan berikut
   - **Folder `tests`**: Berisi semua kode untuk testing.
       - **Fungsi**: Menguji setiap bagian dari kode di `src` untuk memastikan kebenarannya.
       - **Nama File Tes**: Nama file harus sama dengan class yang diuji dengan akhiran `Test`. Contoh: `tests/VideoManagerTest.php` untuk menguji `class VideoManager`.
-  - **Nama Fungsi/Method**: Gunakan `camelCase`, contoh: `public function calculateDuration()`.
+  - **Nama Fungsi/Method**:
+      - Untuk kode aplikasi di `src/`, Gunakan `camelCase` sesuai standar PSR-1. Contoh: `public function calculateDuration()`.
+      - **Khusus untuk file tes di `tests/`**, gunakan `snake_case` untuk nama method agar lebih mudah dibaca seperti kalimat. Contoh: `public function test_it_can_calculate_duration()`.
 
 ### Alur Kerja Git
 
@@ -248,8 +248,3 @@ Sebelum me-review atau menjalankan perubahan ini, pastikan untuk:
     }
     ```
 5.  Pastikan response yang diterima adalah status `201 Created` dengan data user yang baru.
-
------
-
-```
-```
