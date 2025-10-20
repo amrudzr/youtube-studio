@@ -1,6 +1,6 @@
 <?php
 
-namespace PolosHermanoz\YoutubeStudio;
+namespace PolosHermanoz\YoutubeStudio\CommunityManager;
 
 class CommunityManager
 {

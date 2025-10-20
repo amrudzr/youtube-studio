@@ -1,5 +1,5 @@
 <?php
-namespace PolosHermanoz\YoutubeStudio;
+namespace PolosHermanoz\YoutubeStudio\VideoEdit;
 
 class VideoEdit
 {

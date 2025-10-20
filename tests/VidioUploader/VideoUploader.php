@@ -3,7 +3,7 @@
 namespace PolosHermanoz\YoutubeStudio\Tests;
 
 use PHPUnit\Framework\TestCase;
-use PolosHermanoz\YoutubeStudio\VideoUploader;
+use PolosHermanoz\YoutubeStudio\VideoUploader\VideoUploader;
 
 class VideoUploaderTest extends TestCase
 {

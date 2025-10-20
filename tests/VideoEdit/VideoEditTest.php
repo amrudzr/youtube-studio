@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use PolosHermanoz\YoutubeStudio\VideoEdit;
+use PolosHermanoz\YoutubeStudio\VideoEdit\VideoEdit;
 
 class VideoEditTest extends TestCase
 {

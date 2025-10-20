@@ -1,9 +1,9 @@
 <?php
 
-namespace PolosHermanoz\YoutubeStudio\Tests;
+namespace PolosHermanoz\YoutubeStudio\Tests\RevenueManager;
 
 use PHPUnit\Framework\TestCase;
-use PolosHermanoz\YoutubeStudio\RevenueManager;
+use PolosHermanoz\YoutubeStudio\RevenueManager\RevenueManager;
 
 class RevenueManagerTest extends TestCase
 {

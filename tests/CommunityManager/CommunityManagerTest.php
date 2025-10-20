@@ -1,9 +1,9 @@
 <?php
 
-namespace PolosHermanoz\YoutubeStudio\Tests;
+namespace PolosHermanoz\YoutubeStudio\Tests\CommunityManager;
 
 use PHPUnit\Framework\TestCase;
-use PolosHermanoz\YoutubeStudio\CommunityManager;
+use PolosHermanoz\YoutubeStudio\CommunityManager\CommunityManager;
 
 class CommunityManagerTest extends TestCase
 {
