@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - testing
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'hotfix/**'
+      - 'chore/**'
   pull_request:
     types: [ opened, closed ]
 
