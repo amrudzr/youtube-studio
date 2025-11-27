@@ -3,7 +3,7 @@
 namespace PolosHermanoz\YoutubeStudio\Tests;
 
 use PHPUnit\Framework\TestCase;
-use PolosHermanoz\YoutubeStudio\CommunityManager;
+use PolosHermanoz\YoutubeStudio\CommunityManager\CommunityManager;
 
 class CommunityManagerTest extends TestCase
 {
@@ -38,6 +38,7 @@ class CommunityManagerTest extends TestCase
         $this->assertEquals('Terima kasih!', $repliedComments[0]['reply']);
 
         $deletedComments = $manager->getDeletedComments();
+        $this->assertCount(1, $deletedComments);
         $this->assertContains('Komentar spam.', $deletedComments);
     }
 }
