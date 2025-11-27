@@ -18,10 +18,10 @@ class VideoUploaderTest extends TestCase
     public function test_upload_invalid_file_format_fails()
     {
         $uploader = new VideoUploader();
-
+        $uploader->upload("video.txt");
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage("Invalid file format");
 
-        $uploader->upload("video.txt");
+
     }
 }

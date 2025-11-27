@@ -40,8 +40,9 @@ class VideoEditTest extends TestCase
 
         $newData = [
             'title' => 'New Title',
+            'description' => null,
             'visibility' => 'Private'
-            // description sengaja dikosongkan untuk uji error
+
         ];
 
         $this->expectException(\Exception::class);
