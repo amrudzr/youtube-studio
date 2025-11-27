@@ -3,7 +3,7 @@
 namespace PolosHermanoz\YoutubeStudio\Tests;
 
 use PHPUnit\Framework\TestCase;
-use PolosHermanoz\YoutubeStudio\RevenueManager;
+use PolosHermanoz\YoutubeStudio\RevenueManager\RevenueManager;
 
 class RevenueManagerTest extends TestCase
 {
@@ -22,6 +22,7 @@ class RevenueManagerTest extends TestCase
 
         // Step 2: Pastikan breakdown sesuai
         $breakdown = $manager->getRevenueBreakdown();
+        $this->assertCount(2, $breakdown);
         $this->assertEquals($backendAds, $breakdown['ads']);
         $this->assertEquals($backendMembership, $breakdown['membership']);
 
