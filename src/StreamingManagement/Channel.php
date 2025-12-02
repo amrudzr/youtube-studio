@@ -4,7 +4,7 @@ namespace PolosHermanoz\YoutubeStudio\StreamingManagement;
 
 class Channel
 {
-    private $isEligibleForLive;
+    private $isEligibleForLive; // Boolean: true jika memenuhi syarat, false jika tidak
 
     public function __construct(bool $isEligible)
     {
