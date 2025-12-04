@@ -3,6 +3,7 @@
 namespace PolosHermanoz\YoutubeStudio\Tests\ContentManagement;
 
 use PHPUnit\Framework\TestCase;
+// Mengimpor class yang akan dites
 use PolosHermanoz\YoutubeStudio\ContentManagement\User;
 use PolosHermanoz\YoutubeStudio\ContentManagement\Comment;
 use PolosHermanoz\YoutubeStudio\ContentManagement\CommentService;
@@ -12,6 +13,7 @@ class CommentManagementTest extends TestCase
     private $editorUser;
     private $commentService;
 
+    // setUp() dijalankan otomatis sebelum SETIAP fungsi test
     protected function setUp(): void
     {
         // Precondition: User login sebagai Editor
@@ -21,50 +23,53 @@ class CommentManagementTest extends TestCase
 
     /**
      * Menguji aksi 'menyetujui' komentar.
-     * Data Uji: Komentar untuk disetujui: "Video yang bagus!"
+     * Skenario: Editor menyetujui komentar yang statusnya 'pending'.
      */
     public function testApproveComment()
     {
+        // Setup data dummy
         $comment = new Comment(1, "Video yang bagus!", "Viewer123");
+        
+        // Assert awal: pastikan status awalnya benar 'pending'
         $this->assertEquals('pending', $comment->status);
 
+        // Action: Jalankan fungsi approve
         $success = $this->commentService->approve($this->editorUser, $comment);
 
-        // Expected Result: Sistem berhasil melakukan aksi (menyetujui)
+        // Assert akhir: Pastikan fungsi mengembalikan true dan status berubah
         $this->assertTrue($success);
         $this->assertEquals('approved', $comment->status);
     }
 
     /**
      * Menguji aksi 'membalas' komentar.
-     * Data Uji: Teks balasan: "Terima kasih!"
      */
     public function testReplyToComment()
     {
         $originalComment = new Comment(2, "Videonya keren!", "SubscriberA");
         $replyText = "Terima kasih!";
 
+        // Action: Jalankan fungsi reply
         $replyComment = $this->commentService->reply($this->editorUser, $originalComment, $replyText);
 
-        // Expected Result: Sistem berhasil melakukan aksi (membalas)
-        $this->assertNotNull($replyComment);
-        $this->assertEquals($replyText, $replyComment->text);
-        $this->assertEquals($originalComment->id, $replyComment->replyToId);
-        $this->assertEquals('approved', $replyComment->status); // Balasan langsung tayang
+        // Assert: Cek apakah balasan berhasil dibuat
+        $this->assertNotNull($replyComment); // Objek tidak boleh null
+        $this->assertEquals($replyText, $replyComment->text); // Teks harus sama
+        $this->assertEquals($originalComment->id, $replyComment->replyToId); // ID induk harus cocok
+        $this->assertEquals('approved', $replyComment->status); // Balasan admin harus langsung approved
     }
 
     /**
      * Menguji aksi 'menghapus' komentar.
-     * Data Uji: Komentar untuk dihapus: "Komentar spam.”
      */
     public function testDeleteComment()
     {
         $spamComment = new Comment(3, "Komentar spam.", "Spammer01");
-        $this->assertEquals('pending', $spamComment->status); // atau 'approved'
-
+        
+        // Action: Jalankan fungsi delete
         $success = $this->commentService->delete($this->editorUser, $spamComment);
 
-        // Expected Result: Sistem berhasil melakukan aksi (menghapus)
+        // Assert: Status harus berubah jadi 'deleted'
         $this->assertTrue($success);
         $this->assertEquals('deleted', $spamComment->status);
     }

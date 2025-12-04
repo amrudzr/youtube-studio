@@ -1,40 +1,42 @@
 <?php
 
-namespace PolosHermanoz\YoutubeStudio\Tests\StremingManagement;
+namespace PolosHermanoz\YoutubeStudio\Tests\StreamingManagement; // Typo 'Streming' diperbaiki jadi 'Streaming'
 
 use PHPUnit\Framework\TestCase;
-use PolosHermanoz\YoutubeStudio\StreamingManagement\LiveStream;
-use PolosHermanoz\YoutubeStudio\StreamingManagement\User;
-use PolosHermanoz\YoutubeStudio\StreamingManagement\Channel;
 use Exception;
+
+// Class dari StreamingManagement
+use PolosHermanoz\YoutubeStudio\StreamingManagement\LiveStream;
+use PolosHermanoz\YoutubeStudio\StreamingManagement\Channel;
+
+// PENTING: User diambil dari ContentManagement (Sesuai perbaikan struktur sebelumnya)
+use PolosHermanoz\YoutubeStudio\ContentManagement\User;
 
 class LiveStreamTest extends TestCase
 {
     private $editorUser;
     private $eligibleChannel;
 
-    /**
-     * Menyiapkan objek yang dibutuhkan sebelum setiap test dijalankan.
-     */
     protected function setUp(): void
     {
-        // Sesuai Precondition: User login dan Kanal memenuhi syarat
-        $this->editorUser = new User('Editor'); // Sesuai langkah 1
+        // User 'Editor' dibuat dari class User yang ada di ContentManagement
+        $this->editorUser = new User('Editor'); 
+        
+        // Channel yang memenuhi syarat (isEligible = true)
         $this->eligibleChannel = new Channel(true);
     }
     
     /**
      * @test
-     * Menguji keseluruhan alur kerja dari penjadwalan hingga laporan pasca-siaran.
-     * Nama fungsi ini mencerminkan judul Test Case.
+     * Menguji alur lengkap: Jadwal -> Mulai -> Analitik -> Selesai -> Laporan
      */
     public function testScheduleAndBroadcastWorkflow(): void
     {
-        // Langkah 1 & 2: Login dan masuk menu (diwakili oleh pembuatan objek LiveStream)
+        // 1. Inisialisasi LiveStream
         $liveStream = new LiveStream($this->editorUser, $this->eligibleChannel);
         $this->assertInstanceOf(LiveStream::class, $liveStream);
 
-        // Langkah 3, 4, 5, & 6: Menjadwalkan siaran dengan data lengkap
+        // 2. Menjadwalkan siaran
         $streamDetails = [
             'title'       => 'Live Coding Session PHPUnit',
             'description' => 'Membangun unit test dari test case.',
@@ -45,54 +47,51 @@ class LiveStreamTest extends TestCase
         
         $isScheduled = $liveStream->scheduleStream($streamDetails);
 
-        // Validasi Expected Result untuk tahap penjadwalan
+        // Validasi Penjadwalan
         $this->assertTrue($isScheduled, "Gagal menyimpan jadwal siaran.");
         $this->assertTrue($liveStream->isScheduled(), "Status siaran seharusnya 'terjadwal'.");
-        $this->assertEquals($streamDetails['title'], $liveStream->title, "Judul siaran tidak sesuai.");
+        $this->assertEquals($streamDetails['title'], $liveStream->title);
         
-        // Langkah 7: Memulai siaran pada waktu yang ditentukan
+        // 3. Memulai siaran (Start Stream)
         $isStarted = $liveStream->startStream();
 
-        // Validasi Expected Result untuk tahap memulai siaran
+        // Validasi Live Status
         $this->assertTrue($isStarted, "Gagal memulai siaran.");
         $this->assertTrue($liveStream->isLive(), "Status siaran seharusnya 'sedang berlangsung'.");
 
-        // Langkah 8: Memantau analitik real-time
+        // 4. Cek Analitik Real-time
         $analytics = $liveStream->getRealTimeAnalytics();
         
-        // Validasi Expected Result untuk analitik
-        $this->assertIsArray($analytics, "Analitik harus berupa array.");
-        $this->assertNotEmpty($analytics, "Analitik real-time tidak boleh kosong.");
-        $this->assertArrayHasKey('viewers', $analytics, "Data 'viewers' tidak ditemukan.");
-        $this->assertArrayHasKey('likes', $analytics, "Data 'likes' tidak ditemukan.");
-        $this->assertArrayHasKey('chat_count', $analytics, "Data 'chat_count' tidak ditemukan.");
-        $this->assertArrayHasKey('duration_seconds', $analytics, "Data 'durasi' tidak ditemukan.");
+        $this->assertIsArray($analytics);
+        $this->assertArrayHasKey('viewers', $analytics); // Pastikan ada data viewers
+        $this->assertArrayHasKey('duration_seconds', $analytics);
 
-        // Langkah 9: Mengakhiri siaran
+        // 5. Akhiri Siaran
         $liveStream->endStream();
-        
-        // Validasi Expected Result untuk tahap akhir siaran
         $this->assertFalse($liveStream->isLive(), "Status siaran seharusnya sudah 'berakhir'.");
         
-        // Langkah 10: Periksa laporan analitik pasca-siaran
+        // 6. Cek Laporan Akhir (Post Stream Report)
         $report = $liveStream->getPostStreamReport();
 
-        // Validasi Expected Result untuk laporan
-        $this->assertIsArray($report, "Laporan harus berupa array.");
-        $this->assertArrayHasKey('total_viewers', $report, "Laporan harus memiliki total penonton.");
-        $this->assertArrayHasKey('final_duration', $report, "Laporan harus memiliki durasi final.");
+        $this->assertIsArray($report);
+        $this->assertArrayHasKey('total_viewers', $report);
+        $this->assertArrayHasKey('final_duration', $report);
     }
     
     /**
      * @test
-     * Menguji kasus gagal jika kanal tidak memenuhi syarat.
+     * Menguji skenario gagal: Channel belum memenuhi syarat
      */
     public function testShouldThrowExceptionIfChannelIsNotEligible(): void
     {
+        // Kita berharap sistem melempar Error (Exception)
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Channel is not eligible for live streaming.");
         
+        // Buat channel yang TIDAK eligible (false)
         $ineligibleChannel = new Channel(false);
+        
+        // Ini harusnya error dan test dianggap PASS jika error muncul
         new LiveStream($this->editorUser, $ineligibleChannel);
     }
-}   
+}

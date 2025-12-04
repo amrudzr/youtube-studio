@@ -22,6 +22,7 @@ class RevenueManagerTest extends TestCase
 
         // Step 2: Pastikan breakdown sesuai
         $breakdown = $manager->getRevenueBreakdown();
+        $this->assertCount(2, $breakdown);
         $this->assertEquals($backendAds, $breakdown['ads']);
         $this->assertEquals($backendMembership, $breakdown['membership']);
 

@@ -38,6 +38,7 @@ class CommunityManagerTest extends TestCase
         $this->assertEquals('Terima kasih!', $repliedComments[0]['reply']);
 
         $deletedComments = $manager->getDeletedComments();
+        $this->assertCount(1, $deletedComments);
         $this->assertContains('Komentar spam.', $deletedComments);
     }
 }
