@@ -1,6 +1,6 @@
 <?php
 
-namespace PolosHermanoz\YoutubeStudio\Tests;
+namespace PolosHermanoz\YoutubeStudio\Tests\RevenueManager;
 
 use PHPUnit\Framework\TestCase;
 use PolosHermanoz\YoutubeStudio\RevenueManager\RevenueManager;

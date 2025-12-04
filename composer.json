@@ -12,6 +12,11 @@
             "PolosHermanoz\\YoutubeStudio\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "PolosHermanoz\\YoutubeStudio\\Tests\\": "tests/"
+        }
+    },
     "require": {
         "nesbot/carbon": "^3.10"
     }
