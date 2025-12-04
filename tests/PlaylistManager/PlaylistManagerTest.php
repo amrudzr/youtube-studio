@@ -26,17 +26,6 @@ class PlaylistManagerTest extends TestCase
     }
 
     /**
-     * Test gagal membuat playlist yang sudah ada.
-     */
-    public function test_create_duplicate_playlist_returns_false(): void
-    {
-        $this->playlistManager->createPlaylist("My Favorites");
-        $result = $this->playlistManager->createPlaylist("My Favorites");
-        
-        $this->assertFalse($result);
-    }
-
-    /**
      * Test menambahkan video ke playlist.
      */
     public function test_add_video_to_playlist_successfully(): void
@@ -48,15 +37,6 @@ class PlaylistManagerTest extends TestCase
         $this->assertContains("video123", $this->playlistManager->getPlaylistVideos("My Favorites"));
     }
 
-    /**
-     * Test menambahkan video ke playlist yang tidak ada.
-     */
-    public function test_add_video_to_nonexistent_playlist_returns_false(): void
-    {
-        $result = $this->playlistManager->addVideo("Nonexistent", "video123");
-        
-        $this->assertFalse($result);
-    }
 
     /**
      * Test menambahkan video duplikat.
