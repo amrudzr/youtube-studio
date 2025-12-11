@@ -1,0 +1,74 @@
+{
+    "users": [
+        { "id": 1, "role": "Editor", "email": "editor@studio.com", "notes": "User utama untuk testing upload" },
+        { "id": 2, "role": "Viewer", "email": "netizen@indo.com", "notes": "User tanpa izin" },
+        { "id": 3, "role": "Pengelola", "email": "boss@studio.com", "notes": "Super admin" },
+        { "id": 4, "role": "Editor", "email": "editor2@studio.com", "notes": "Editor cadangan" },
+        { "id": 5, "role": "Viewer", "email": "spammer@bot.com", "notes": "Akun spam" }
+    ],
+    "content": {
+        "shorts": {
+            "title": "Kucing Lucu",
+            "description": "Video kucing lompat",
+            "duration": 58,
+            "file_path": "/videos/cat.mp4"
+        },
+        "shorts_pool": [
+            { "title": "Tutorial Masak", "description": "Masak nasi goreng", "duration": 59, "file_path": "/videos/cook.mp4" },
+            { "title": "Vlog Harian", "description": "Jalan-jalan di taman", "duration": 30, "file_path": "/videos/vlog.mp4" },
+            { "title": "Video Terlalu Panjang", "description": "Ini harusnya gagal", "duration": 120, "file_path": "/videos/fail.mp4" },
+            { "title": "Dance Challenge", "description": "Ikut tren tiktok", "duration": 15, "file_path": "/videos/dance.mp4" },
+            { "title": "Review Gadget", "description": "HP baru keluar", "duration": 45, "file_path": "/videos/tech.mp4" }
+        ],
+        "comment": {
+            "id": 101,
+            "text": "Konten yang sangat mendidik!",
+            "author": "FansBerat",
+            "status": "pending"
+        },
+        "comments_pool": [
+            { "id": 201, "text": "Wah keren banget bang!", "author": "SubscriberLama", "status": "pending" },
+            { "id": 202, "text": "Info loker gan?", "author": "PencariKerja", "status": "pending" },
+            { "id": 203, "text": "Sub back kak", "author": "YouTuberPemula", "status": "spam" },
+            { "id": 204, "text": "Kualitas videonya makin bagus", "author": "PengamatFilm", "status": "pending" },
+            { "id": 205, "text": "First!", "author": "BocilKematian", "status": "pending" },
+            { "id": 206, "text": "Tutorialnya kurang jelas di menit 0:30", "author": "SiKritis", "status": "pending" },
+            { "id": 207, "text": "Mantap jiwa", "author": "FansSejati", "status": "approved" },
+            { "id": 208, "text": "Link pembelian mana?", "author": "Buyer01", "status": "pending" },
+            { "id": 209, "text": "Gak lucu videonya", "author": "Hater123", "status": "pending" },
+            { "id": 210, "text": "Semangat terus bikin kontennya!", "author": "SupportSystem", "status": "pending" }
+        ]
+    },
+    "streaming": {
+        "channel_eligible": true,
+        "channel_ineligible": false,
+        "scenarios": [
+            { "is_eligible": true, "role": "Editor", "expected": "success" },
+            { "is_eligible": false, "role": "Editor", "expected": "fail" },
+            { "is_eligible": true, "role": "Viewer", "expected": "fail" }
+        ]
+    },
+    "assets": {
+        "audio_track": "Calm Waves",
+        "audio_tracks_pool": [
+            "Calm Waves",
+            "Uplifting Beat",
+            "Soft Piano",
+            "Rock Anthem",
+            "Jazz Vibes",
+            "Lo-Fi Study",
+            "Cinematic Intro"
+        ]
+    },
+    "playlist": {
+        "name": "Upload Terbaru",
+        "playlist_pool": [
+            "Upload Terbaru",
+            "Favorit 2024",
+            "Tutorial Coding",
+            "Vlog Liburan",
+            "Review Makanan",
+            "Musik Pengantar Tidur"
+        ]
+    }
+}
