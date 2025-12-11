@@ -22,8 +22,30 @@ class VideoEditTest extends TestCase
 
     public function testAudioLibraryTrackAvailable()
     {
+<<<<<<< HEAD
         $library = new AudioLibrary();
         $this->assertTrue($library->isTrackAvailable('Calm Waves'));
+=======
+        $editor = new VideoEdit();
+
+        $video = [
+            'title' => 'Old Title',
+            'description' => 'Old Description',
+            'visibility' => 'Public'
+        ];
+
+        $newData = [
+            'title' => 'New Title',
+            'description' => null,
+            'visibility' => 'Private'
+
+        ];
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("Field 'description' tidak boleh kosong");
+
+        $editor->updateMetadata($video, $newData);
+>>>>>>> dfe3e76d05a41d298ede8c184d4c75e852120ff8
     }
 
     public function testAudioLibraryTrackUnavailable()
