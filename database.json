@@ -1,0 +1,42 @@
+{
+    "videos": [
+        {
+            "id": 521,
+            "title": "Hidup Jokowi",
+            "duration": 10,
+            "uploaded_by": "Editor",
+            "created_at": "2025-12-05 06:38:08"
+        },
+        {
+            "id": 761,
+            "title": "Shorts Keren",
+            "duration": 59,
+            "uploaded_by": "Editor",
+            "created_at": "2025-12-11 11:33:05"
+        }
+    ],
+    "approved_comments": [
+        {
+            "comment_id": 99,
+            "approved_by": "Editor",
+            "status": "approved",
+            "timestamp": "2025-12-05 07:09:14"
+        }
+    ],
+    "playlists": [
+        {
+            "playlist_name": "My Favorites",
+            "video_id": "vid-1",
+            "added_at": "2025-12-05 07:09:03"
+        }
+    ],
+    "streams": [
+        {
+            "stream_id": "live_8456",
+            "title": "Live Stream API Test",
+            "host": "Editor",
+            "started_at": "2025-12-05 07:11:09",
+            "status": "live"
+        }
+    ]
+}

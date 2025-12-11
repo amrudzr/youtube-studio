@@ -1,35 +1,31 @@
 <?php
+
 use PHPUnit\Framework\TestCase;
-use PolosHermanoz\YoutubeStudio\VideoEdit\VideoEdit;
+use PolosHermanoz\YoutubeStudio\VideoEditorTools\AudioLibrary;
+use PolosHermanoz\YoutubeStudio\VideoEditorTools\Video;
+use PolosHermanoz\YoutubeStudio\VideoEditorTools\VideoEditor;
 
 class VideoEditTest extends TestCase
 {
-    public function testUpdateMetadataSuccessfully()
+    public function testAudioLibraryReturnsCorrectTracks()
     {
-        $editor = new VideoEdit();
+        $library = new AudioLibrary();
 
-        $video = [
-            'title' => 'Old Title',
-            'description' => 'Old Description',
-            'visibility' => 'Public'
-        ];
+        $tracks = $library->getAvailableTracks();
 
-        $newData = [
-            'title' => 'New Title',
-            'description' => 'New Description',
-            'visibility' => 'Private'
-        ];
-
-        $updatedVideo = $editor->updateMetadata($video, $newData);
-
-        $this->assertEquals('New Title', $updatedVideo['title']);
-        $this->assertEquals('New Description', $updatedVideo['description']);
-        $this->assertEquals('Private', $updatedVideo['visibility']);
-        $this->assertEquals('saved', $updatedVideo['status']);
+        $this->assertIsArray($tracks);
+        $this->assertCount(3, $tracks);
+        $this->assertContains('Calm Waves', $tracks);
+        $this->assertContains('Uplifting Beat', $tracks);
+        $this->assertContains('Soft Piano', $tracks);
     }
 
-    public function testUpdateMetadataWithMissingFieldThrowsException()
+    public function testAudioLibraryTrackAvailable()
     {
+<<<<<<< HEAD
+        $library = new AudioLibrary();
+        $this->assertTrue($library->isTrackAvailable('Calm Waves'));
+=======
         $editor = new VideoEdit();
 
         $video = [
@@ -49,5 +45,110 @@ class VideoEditTest extends TestCase
         $this->expectExceptionMessage("Field 'description' tidak boleh kosong");
 
         $editor->updateMetadata($video, $newData);
+>>>>>>> dfe3e76d05a41d298ede8c184d4c75e852120ff8
+    }
+
+    public function testAudioLibraryTrackUnavailable()
+    {
+        $library = new AudioLibrary();
+        $this->assertFalse($library->isTrackAvailable('Unknown Track'));
+    }
+
+    public function testVideoInitialState()
+    {
+        $video = new Video("My Video");
+        $status = $video->getStatus();
+
+        $this->assertEquals("My Video", $status['title']);
+        $this->assertFalse($status['trimmed']);
+        $this->assertFalse($status['blurred']);
+        $this->assertNull($status['audio']);
+    }
+
+    public function testVideoTrim()
+    {
+        $video = new Video("Test");
+        $video->trim();
+
+        $this->assertTrue($video->getStatus()['trimmed']);
+    }
+
+    public function testVideoBlur()
+    {
+        $video = new Video("Test");
+        $video->blur();
+
+        $this->assertTrue($video->getStatus()['blurred']);
+    }
+
+    public function testVideoAddAudio()
+    {
+        $video = new Video("Test");
+        $video->addAudio("Soft Piano");
+
+        $this->assertEquals("Soft Piano", $video->getStatus()['audio']);
+    }
+
+    public function testVideoReplaceAudio()
+    {
+        $video = new Video("Test");
+        $video->addAudio("Soft Piano");
+        $video->addAudio("Calm Waves");
+
+        $this->assertEquals("Calm Waves", $video->getStatus()['audio']);
+    }
+
+    public function testEditorTrimVideoUpdatesState()
+    {
+        $library = new AudioLibrary();
+        $editor  = new VideoEditor($library);
+        $video   = new Video("Test");
+
+        $this->assertTrue($editor->trimVideo($video));
+        $this->assertTrue($video->getStatus()['trimmed']);
+    }
+
+    public function testEditorBlurVideoUpdatesState()
+    {
+        $library = new AudioLibrary();
+        $editor  = new VideoEditor($library);
+        $video   = new Video("Test");
+
+        $this->assertTrue($editor->blurVideo($video));
+        $this->assertTrue($video->getStatus()['blurred']);
+    }
+
+    public function testEditorAddAudioValid()
+    {
+        $library = new AudioLibrary();
+        $editor  = new VideoEditor($library);
+        $video   = new Video("Test");
+
+        $this->assertTrue($editor->addAudio($video, "Calm Waves"));
+        $this->assertEquals("Calm Waves", $video->getStatus()['audio']);
+    }
+
+    public function testEditorAddAudioInvalidThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Audio track not found");
+
+        $library = new AudioLibrary();
+        $editor  = new VideoEditor($library);
+        $video   = new Video("Test");
+
+        $editor->addAudio($video, "Unknown Track");
+    }
+
+    public function testEditorReplacingAudioStillWorks()
+    {
+        $library = new AudioLibrary();
+        $editor  = new VideoEditor($library);
+        $video   = new Video("Test");
+
+        $editor->addAudio($video, "Calm Waves");
+        $editor->addAudio($video, "Soft Piano");
+
+        $this->assertEquals("Soft Piano", $video->getStatus()['audio']);
     }
 }
