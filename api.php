@@ -15,238 +15,268 @@ use PolosHermanoz\YoutubeStudio\PlaylistManager\PlaylistManager;
 
 header('Content-Type: application/json');
 
-// ==========================================
-// 1. HELPER FUNCTIONS (Logging & Database)
-// ==========================================
 
+// ==========================================
+// 1. LOGGING FUNCTION
+// ==========================================
 function writeLog($message) {
-    // Simpan log di folder tests/Logs/api_debug.log
     $logFile = __DIR__ . '/tests/Logs/api_debug.log';
     
-    // Pastikan folder ada
     if (!is_dir(dirname($logFile))) {
         mkdir(dirname($logFile), 0777, true);
     }
     
     $timestamp = date('Y-m-d H:i:s');
-    // Format: [Waktu] [IP] Pesan
-    $logEntry = "[$timestamp] [{$_SERVER['REMOTE_ADDR']}] $message" . PHP_EOL;
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
+    $logEntry = "[$timestamp] [$ip] $message" . PHP_EOL;
     
     file_put_contents($logFile, $logEntry, FILE_APPEND);
 }
 
-// FUNGSI YANG HILANG SEBELUMNYA
+
+// ==========================================
+// 2. DATABASE SAVE (JSON + MYSQL)
+// ==========================================
 function saveToDatabase($key, $data) {
+
+    // ============================
+    // A. SIMPAN KE JSON
+    // ============================
     $dbFile = __DIR__ . '/database.json';
     
-    // 1. Baca data lama
     if (file_exists($dbFile)) {
-        $jsonContent = file_get_contents($dbFile);
-        $currentData = json_decode($jsonContent, true);
-        
-        // Jika file ada tapi kosong atau bukan JSON valid, inisialisasi ulang
-        if (!is_array($currentData)) {
-            $currentData = ['videos' => [], 'approved_comments' => [], 'playlists' => []];
-        }
+        $content = json_decode(file_get_contents($dbFile), true);
+        if (!is_array($content)) $content = [];
     } else {
-        $currentData = ['videos' => [], 'approved_comments' => [], 'playlists' => []];
+        $content = [];
     }
 
-    // 2. Tambahkan data baru
-    // Pastikan key tujuan ada dalam array, jika tidak, buat array baru
-    if (!isset($currentData[$key])) {
-        $currentData[$key] = [];
+    if (!isset($content[$key])) {
+        $content[$key] = [];
     }
-    
-    $currentData[$key][] = $data;
 
-    // 3. Simpan kembali ke file
-    file_put_contents($dbFile, json_encode($currentData, JSON_PRETTY_PRINT));
+    $content[$key][] = $data;
+
+    file_put_contents($dbFile, json_encode($content, JSON_PRETTY_PRINT));
+
+
+
+    // ============================
+    // B. SIMPAN KE MYSQL
+    // ============================
+    $host = "localhost";
+    $user = "root";
+    $pass = "";
+    $dbname = "youtube_studio";
+
+    try {
+        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Table name = key
+        $table = $key;
+
+        // Buat tabel otomatis
+        $fields = [];
+        foreach ($data as $col => $value) {
+            $fields[] = "`$col` TEXT";
+        }
+
+        $fieldsSql = implode(", ", $fields);
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `$table` (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            $fieldsSql,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );");
+
+        // Insert Data
+        $columns = implode(", ", array_map(fn($c) => "`$c`", array_keys($data)));
+        $placeholders = implode(", ", array_map(fn($c) => ":$c", array_keys($data)));
+
+        $stmt = $pdo->prepare("INSERT INTO `$table` ($columns) VALUES ($placeholders)");
+        $stmt->execute($data);
+
+    } catch (Exception $e) {
+        writeLog("MySQL ERROR: " . $e->getMessage());
+    }
 }
 
+
+// ==========================================
+// 3. RESPONSE HANDLER
+// ==========================================
 function sendResponse($status, $message, $data = []) {
-    $response = ['status' => $status, 'message' => $message, 'data' => $data];
-    echo json_encode($response);
-    
-    // Log response status
+    echo json_encode(['status' => $status, 'message' => $message, 'data' => $data]);
     writeLog("Response Sent: [$status] $message");
     exit;
 }
 
-// ==========================================
-// 2. MAIN LOGIC
-// ==========================================
 
+// ==========================================
+// 4. MAIN API LOGIC
+// ==========================================
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_GET['action'] ?? '';
 
-// Log Request Masuk
 writeLog("New Request: $method /?action=$action");
-if ($method === 'POST') {
-    writeLog("Payload: " . json_encode($_POST));
-}
+
 
 try {
     if ($method === 'POST') {
+
         switch ($action) {
+
+            // ============================
+            // UPLOAD SHORT VIDEO
+            // ============================
             case 'upload_shorts':
                 $role = $_POST['role'] ?? 'Viewer';
                 $title = $_POST['title'] ?? '';
                 $duration = (int)($_POST['duration'] ?? 0);
 
-                writeLog("Action: Upload Shorts by $role");
-
                 $user = new User($role);
                 $service = new ShortsService();
-                
-                ob_start(); 
+
+                ob_start();
                 $video = $service->uploadShort($user, '/tmp/demo.mp4', $duration, $title, 'Desc');
                 ob_end_clean();
 
                 if ($video) {
-                    // Simpan ke database JSON
-                    $videoData = [
-                        'id' => $video->id,
-                        'title' => $video->title,
+                    $data = [
+                        'video_id' => $video->id,
+                        'title'    => $video->title,
                         'duration' => $video->duration,
                         'uploaded_by' => $role,
                         'created_at' => date('Y-m-d H:i:s')
                     ];
-                    saveToDatabase('videos', $videoData);
 
-                    sendResponse('success', 'Shorts uploaded successfully', $videoData);
-                } else {
-                    writeLog("Error: Upload rejected (Permission/Duration)");
-                    sendResponse('error', 'Upload failed. Check permissions or duration.');
+                    saveToDatabase('videos', $data);
+                    sendResponse('success', 'Shorts uploaded', $data);
                 }
+
+                sendResponse('error', 'Upload failed');
                 break;
 
+
+
+            // ============================
+            // ADD AUDIO
+            // ============================
             case 'add_audio':
-                $trackName = $_POST['track_name'] ?? '';
-                writeLog("Action: Add Audio '$trackName'");
-                
+                $track = $_POST['track_name'] ?? '';
+
                 $library = new AudioLibrary();
                 $editor = new VideoEditor($library);
-                $video = new EditorVideo('Vlog Santai');
+                $video = new EditorVideo('Vlog');
 
                 try {
-                    $editor->addAudio($video, $trackName);
-                    sendResponse('success', 'Audio added to video', $video->getStatus());
+                    $editor->addAudio($video, $track);
+                    sendResponse('success', 'Audio added', $video->getStatus());
                 } catch (Exception $e) {
-                    writeLog("Error: " . $e->getMessage());
                     sendResponse('error', $e->getMessage());
                 }
                 break;
 
+
+
+            // ============================
+            // START LIVE STREAM
+            // ============================
             case 'start_stream':
                 $role = $_POST['role'] ?? 'Viewer';
-                $isEligible = filter_var($_POST['is_eligible'] ?? false, FILTER_VALIDATE_BOOLEAN);
-                
-                writeLog("Action: Start Stream by $role (Eligible: " . ($isEligible ? 'Yes' : 'No') . ")");
+                $eligible = filter_var($_POST['is_eligible'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-                $user = new User($role); 
-                $channel = new Channel($isEligible);
+                $user = new User($role);
+                $channel = new Channel($eligible);
+                $stream = new LiveStream($user, $channel);
 
-                try {
-                    $stream = new LiveStream($user, $channel);
-                    
-                    // 1. Integrasi Logic: Lakukan 'Scheduling' (Otomatis dummy data)
-                    // Karena startStream() akan return false jika belum scheduled
-                    $stream->scheduleStream([
-                        'title' => 'Live Stream API Test',
-                        'description' => 'Testing dari API Endpoint',
-                        'time' => date('Y-m-d H:i:s'),
-                        'thumbnail' => '/img/live_thumb.jpg'
-                    ]);
+                $stream->scheduleStream([
+                    'title' => 'Live Test',
+                    'description' => 'API Stream',
+                    'time' => date('Y-m-d H:i:s'),
+                    'thumbnail' => '/img/thumb.jpg'
+                ]);
 
-                    // 2. Integrasi Logic: Coba Mulai Stream
-                    if ($stream->startStream()) {
-                        
-                        // 3. SIMPAN KE DATABASE JSON
-                        $streamData = [
-                            'stream_id' => 'live_' . rand(1000, 9999),
-                            'title' => $stream->title,
-                            'host' => $role,
-                            'started_at' => date('Y-m-d H:i:s'),
-                            'status' => 'live'
-                        ];
-                        saveToDatabase('streams', $streamData);
-                        // ---------------------------
+                if ($stream->startStream()) {
+                    $data = [
+                        'stream_id' => 'live_' . rand(1000, 9999),
+                        'title' => $stream->title,
+                        'host'  => $role,
+                        'status' => 'live',
+                        'started_at' => date('Y-m-d H:i:s')
+                    ];
 
-                        sendResponse('success', 'Live stream started and saved', $streamData);
-                    } else {
-                        writeLog("Error: Failed to start stream logic");
-                        sendResponse('error', 'Failed to start stream (Scheduling issue?)');
-                    }
-
-                } catch (Exception $e) {
-                    writeLog("Error: " . $e->getMessage());
-                    sendResponse('error', $e->getMessage());
+                    saveToDatabase('streams', $data);
+                    sendResponse('success', 'Live Started', $data);
                 }
+
+                sendResponse('error', 'Start failed');
                 break;
 
+
+
+            // ============================
+            // APPROVE COMMENT
+            // ============================
             case 'approve_comment':
                 $role = $_POST['role'] ?? 'Viewer';
                 $commentId = (int)($_POST['comment_id'] ?? 1);
-                writeLog("Action: Approve Comment #$commentId by $role");
 
                 $user = new User($role);
-                $comment = new Comment($commentId, 'Konten bagus', 'Netizen');
+                $comment = new Comment($commentId, 'Komentar bagus', 'Netizen');
                 $service = new CommentService();
 
                 if ($service->approve($user, $comment)) {
-                    // Simpan ke database JSON
-                    $approvalData = [
+                    $data = [
                         'comment_id' => $commentId,
                         'approved_by' => $role,
                         'status' => 'approved',
                         'timestamp' => date('Y-m-d H:i:s')
                     ];
-                    saveToDatabase('approved_comments', $approvalData);
 
-                    sendResponse('success', 'Comment approved', $approvalData);
-                } else {
-                    writeLog("Error: Approval denied");
-                    sendResponse('error', 'Permission denied');
+                    saveToDatabase('approved_comments', $data);
+                    sendResponse('success', 'Comment Approved', $data);
                 }
+
+                sendResponse('error', 'Permission Denied');
                 break;
 
+
+
+            // ============================
+            // ADD TO PLAYLIST
+            // ============================
             case 'add_to_playlist':
-                $playlistName = $_POST['playlist_name'] ?? 'My Favorites';
+                $playlist = $_POST['playlist_name'] ?? 'My Playlist';
                 $videoId = $_POST['video_id'] ?? 'vid_123';
-                writeLog("Action: Add Video $videoId to Playlist '$playlistName'");
 
                 $manager = new PlaylistManager();
-                $manager->createPlaylist($playlistName);
-                
-                if ($manager->addVideo($playlistName, $videoId)) {
-                    // Simpan ke database JSON
-                    $playlistData = [
-                        'playlist_name' => $playlistName,
-                        'video_id' => $videoId,
-                        'added_at' => date('Y-m-d H:i:s')
-                    ];
-                    saveToDatabase('playlists', $playlistData); // <-- Fungsi ini sekarang sudah ada
+                $manager->createPlaylist($playlist);
+                $manager->addVideo($playlist, $videoId);
 
-                    sendResponse('success', 'Video added to playlist', [
-                        'playlist' => $playlistName,
-                        'videos' => $manager->getPlaylistVideos($playlistName)
-                    ]);
-                } else {
-                    writeLog("Error: Failed add to playlist");
-                    sendResponse('error', 'Failed to add video (maybe duplicate)');
-                }
+                $data = [
+                    'playlist_name' => $playlist,
+                    'video_id' => $videoId,
+                    'added_at' => date('Y-m-d H:i:s')
+                ];
+
+                saveToDatabase('playlists', $data);
+
+                sendResponse('success', 'Video added to playlist', $data);
                 break;
 
+
             default:
-                writeLog("Warning: Action '$action' not found");
-                sendResponse('error', 'Action not found');
+                sendResponse('error', 'Unknown action');
         }
+
     } else {
-        writeLog("Warning: Method $method not allowed");
-        sendResponse('error', 'Method not allowed');
+        sendResponse('error', 'Method Not Allowed');
     }
-} catch (Exception $e) {
-    writeLog("CRITICAL ERROR: " . $e->getMessage());
-    sendResponse('error', 'Server Error: ' . $e->getMessage());
 }
+catch (Exception $e) {
+    writeLog("ERROR: " . $e->getMessage());
+    sendResponse('error', $e->getMessage());
+}
+
